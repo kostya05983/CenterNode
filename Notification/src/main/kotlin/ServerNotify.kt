@@ -30,6 +30,7 @@ class ServerNotify(private val port: Int) : Runnable {
         }
     }
 
+    //TODO делаем обработку комманд, которые  могут прийти серверу
     inner class Handler : SimpleChannelInboundHandler<DatagramPacket>() {
         override fun channelRead0(ctx: ChannelHandlerContext?, msg: DatagramPacket?) {
             println("I recieved ${msg?.content().toString()}")
