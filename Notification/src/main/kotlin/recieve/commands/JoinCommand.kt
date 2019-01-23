@@ -1,9 +1,10 @@
 package recieve.commands
 
-import recieve.commands.RecieveCommand
+import io.netty.channel.ChannelHandlerContext
 
-class JoinCommand: RecieveCommand {
+class JoinCommand(override var ctx: ChannelHandlerContext?) : RecieveCommand {
     override fun execute() {
+
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

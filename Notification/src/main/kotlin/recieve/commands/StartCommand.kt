@@ -1,7 +1,15 @@
 package recieve.commands
 
-class StartCommand: RecieveCommand {
+import io.netty.channel.ChannelHandlerContext
+import java.net.InetAddress
+import java.net.InetSocketAddress
+
+class StartCommand(override var ctx: ChannelHandlerContext?) : RecieveCommand {
+    //TODO сделать примитивный кэш, распределнный между всеми классами, можно по началу использовать обычное хранилище
+    private val ips = ArrayList<InetAddress>()
+
+
     override fun execute() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        ips.add((ctx?.channel()?.remoteAddress() as InetSocketAddress).address)
     }
 }
