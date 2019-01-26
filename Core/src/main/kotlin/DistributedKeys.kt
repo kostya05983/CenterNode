@@ -1,0 +1,3 @@
+enum class DistributedKeys {
+    Ips;
+}

@@ -3,7 +3,11 @@ interface ListProvider<V> {
 
     fun loadAll()
 
-    fun save(value: V)
+    fun add(value: V)
 
-    fun saveAll()
+    fun addAll(vararg value: V)
+
+    fun remove(value: V)
+
+    fun removeAll()
 }

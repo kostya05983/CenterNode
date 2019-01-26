@@ -2,7 +2,10 @@
 interface DArray<V> : MutableList<V> {
     val listProvider: ListProvider<V>
 
-    override fun add(element: V): Boolean
+    fun evict(index: Int)
 
-    fun addAll(collection: DArray<V>)
+    fun evict(value: V):Boolean
+
+    fun evictAll()
+
 }

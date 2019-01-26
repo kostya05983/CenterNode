@@ -1,9 +1,8 @@
-import java.util.*
-
 class DArrayImpl<V> private constructor(
         private var array: Array<V>,
         override val listProvider: ListProvider<V>
 ) : DArray<V> {
+
     private val defaultOffSet = 2
     private val defaultResizeAddition = 10
     private var _size = 0
@@ -17,6 +16,24 @@ class DArrayImpl<V> private constructor(
 
     constructor(collection: DArray<V>) : this(collection.size, collection.listProvider) {
         addAll(collection)
+    }
+
+    /**
+     * throw IndexOfOutBoundsException
+     * if element's index isn't in range
+     */
+    private fun checkIndex(index: Int) {
+        if (index < 0 || index >= _size)
+            throw IndexOutOfBoundsException(outOfBoundsMsg(index))
+    }
+
+    /**
+     * Constructs an IndexOutOfBoundsException detail message.
+     * Of the many possible refactorings of the error handling code,
+     * this "outlining" performs best with both server and client VMs.
+     */
+    private fun outOfBoundsMsg(index: Int): String {
+        return "Index: $index, Size: $_size"
     }
 
     private fun resizeIfNeed() {
@@ -38,16 +55,24 @@ class DArrayImpl<V> private constructor(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    /**
+     * return value at specified index if it is in cache
+     */
     override fun get(index: Int): V {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        checkIndex(index)
+        return array[index]
     }
 
     override fun indexOf(element: V): Int {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        for (i in 0 until _size) {
+            if (array[i] == element)
+                return i
+        }
+        return -1
     }
 
     override fun isEmpty(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return _size == 0
     }
 
     override fun lastIndexOf(element: V): Int {
@@ -56,12 +81,15 @@ class DArrayImpl<V> private constructor(
 
     override fun add(element: V): Boolean {
         resizeIfNeed()
-        array[size]
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        array[_size++] = element
+        listProvider.add(element)
+        return true
     }
 
     override fun add(index: Int, element: V) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        checkIndex(index)
+        resizeIfNeed()
+        array[_size++] = element
     }
 
     override fun addAll(index: Int, elements: Collection<V>): Boolean {
@@ -72,12 +100,9 @@ class DArrayImpl<V> private constructor(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun addAll(collection: DArray<V>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     override fun clear() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        array = arrayOfUninitializedElements(10)
+        _size = 0
     }
 
     override fun iterator(): MutableIterator<V> {
@@ -92,8 +117,54 @@ class DArrayImpl<V> private constructor(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    //TODo make if element is the first init with default size and emptyArray
+    private fun moveElements(index: Int) {
+        val newArray = arrayOfUninitializedElements<V>(_size - 1)
+        var newIndex = 0
+        if (_size != 1)
+            for (i in 0 until _size) {
+                if (i != index) {
+                    newArray[newIndex] = array[i]
+                    newIndex++
+                }
+            }
+        array = newArray
+    }
+
+    override fun evict(index: Int) {
+        checkIndex(index)
+        moveElements(_size)
+        _size--
+    }
+
+    /**
+     * remove value from cache
+     */
+    override fun evict(value: V): Boolean {
+        val index = indexOf(value)
+        return if (index != -1) {
+            moveElements(_size)
+            _size--
+            true
+        } else false
+    }
+
+    /**
+     * remove all values from cache
+     */
+    override fun evictAll() {
+        array = arrayOfUninitializedElements(10)
+        _size = 0
+    }
+
+    /**
+     * remove value from cache and db
+     */
+    //TODO необходимо сделать транзакцию,чтобы можно было откатывать изменения,
     override fun remove(element: V): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        evict(element)
+        listProvider.remove(element)
+        return true
     }
 
     override fun removeAll(elements: Collection<V>): Boolean {

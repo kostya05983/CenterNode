@@ -1,10 +1,13 @@
 package recieve.commands
 
 import io.netty.channel.ChannelHandlerContext
+import java.net.InetSocketAddress
 
 class JoinCommand(override var ctx: ChannelHandlerContext?) : RecieveCommand {
-    override fun execute() {
+    private val ips = DistributedManager.getInstance().getArrayList<String>(DistributedKeys.Ips.name)!!
 
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+    override fun execute() {
+        ips.add((ctx?.channel()?.remoteAddress() as InetSocketAddress).address.hostAddress)
     }
 }
