@@ -10,10 +10,8 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    // https://mvnrepository.com/artifact/io.ktor/ktor-client-core-native
-// https://mvnrepository.com/artifact/io.netty/netty-all
     compile group: 'io.netty', name: 'netty-all', version: '4.1.32.Final'
-
+    
 }
 
 compileKotlin {
