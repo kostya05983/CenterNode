@@ -106,7 +106,7 @@ class DArrayImpl<V> private constructor(
     }
 
     override fun iterator(): MutableIterator<V> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return IteratorArr()
     }
 
     override fun listIterator(): MutableListIterator<V> {
@@ -115,6 +115,29 @@ class DArrayImpl<V> private constructor(
 
     override fun listIterator(index: Int): MutableListIterator<V> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    //TODO thread safety
+    private inner class IteratorArr : MutableIterator<V> {
+        private var currentIndex = 0
+
+        override fun hasNext(): Boolean {
+            return currentIndex != size
+        }
+
+        override fun next(): V {
+            if (currentIndex >= size)
+                throw NoSuchElementException()
+            currentIndex++
+            return array[currentIndex - 1]
+        }
+
+        override fun remove() {
+            if (currentIndex >= size)
+                throw NoSuchElementException()
+            this@DArrayImpl.remove(array[currentIndex])
+            currentIndex--
+        }
     }
 
     //TODo make if element is the first init with default size and emptyArray
