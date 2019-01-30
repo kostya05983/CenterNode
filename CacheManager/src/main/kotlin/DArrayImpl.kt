@@ -1,3 +1,5 @@
+import kotlin.reflect.jvm.internal.impl.resolve.NonReportingOverrideStrategy
+
 class DArrayImpl<V> private constructor(
         private var array: Array<V>,
         override val listProvider: ListProvider<V>
@@ -110,11 +112,11 @@ class DArrayImpl<V> private constructor(
     }
 
     override fun listIterator(): MutableListIterator<V> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return ListIterator()
     }
 
     override fun listIterator(index: Int): MutableListIterator<V> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return ListIterator(index)
     }
 
     //TODO thread safety
@@ -135,8 +137,67 @@ class DArrayImpl<V> private constructor(
         override fun remove() {
             if (currentIndex >= size)
                 throw NoSuchElementException()
-            this@DArrayImpl.remove(array[currentIndex])
+            this@DArrayImpl.removeAt(currentIndex)
+        }
+    }
+
+    private inner class ListIterator() : MutableListIterator<V> {
+        private var currentIndex = 0
+
+        constructor(index: Int) : this() {
+            if (index >= size)
+                throw NoSuchElementException()
+            this.currentIndex = index
+        }
+
+        override fun hasPrevious(): Boolean {
+            return currentIndex > 0
+        }
+
+        override fun nextIndex(): Int {
+            if (!hasNext())
+                throw NoSuchElementException()
+            return currentIndex + 1
+        }
+
+        override fun previous(): V {
+            if (currentIndex <= 0)
+                throw java.lang.IndexOutOfBoundsException()
             currentIndex--
+            return array[currentIndex]
+        }
+
+        override fun previousIndex(): Int {
+            if (currentIndex <= 0)
+                throw java.lang.IndexOutOfBoundsException()
+            return currentIndex - 1
+        }
+
+        override fun add(element: V) {
+            this@DArrayImpl.add(element)
+        }
+
+        override fun hasNext(): Boolean {
+            return currentIndex != size
+        }
+
+        override fun next(): V {
+            if (currentIndex >= size)
+                throw NoSuchElementException()
+            currentIndex++
+            return array[currentIndex - 1]
+        }
+
+        override fun remove() {
+            if (currentIndex >= size)
+                throw NoSuchElementException()
+            this@DArrayImpl.removeAt(currentIndex)
+        }
+
+        override fun set(element: V) {
+            if (currentIndex <= 0 && currentIndex > size)
+                throw NoSuchElementException()
+            array[currentIndex] = element
         }
     }
 
@@ -156,7 +217,7 @@ class DArrayImpl<V> private constructor(
 
     override fun evict(index: Int) {
         checkIndex(index)
-        moveElements(_size)
+        moveElements(index)
         _size--
     }
 
@@ -195,7 +256,10 @@ class DArrayImpl<V> private constructor(
     }
 
     override fun removeAt(index: Int): V {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val value = array[index]
+        listProvider.remove(array[index])
+        evict(index)
+        return value
     }
 
     override fun retainAll(elements: Collection<V>): Boolean {
